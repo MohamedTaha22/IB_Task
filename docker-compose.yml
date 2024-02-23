@@ -1,0 +1,83 @@
+version: '3.9'
+
+services:
+  db:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: myapp_development
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    ports:
+      - "3307:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+#    healthcheck:
+#      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+#      interval: 10s
+#      timeout: 5s
+#      retries: 5
+
+  redis:
+    image: redis:6.2.0
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.9.2
+    environment:
+      - discovery.type=single-node
+    ports:
+      - "9200:9200"
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9200"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  sidekiq:
+    build: .
+    command: bundle exec sidekiq
+    volumes:
+      - .:/myapp
+    depends_on:
+      - redis
+    environment:
+      - REDIS_URL_SIDEKIQ=redis://redis:6379/1
+      - ELASTICSEARCH_URL=http://elasticsearch:9200
+
+
+  app:
+    build: .
+    restart: on-failure
+    environment:
+      DB_HOST: db
+      DB_USERNAME: user
+      DB_PASSWORD: password
+      REDIS_HOST: redis
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+    ports:
+      - "3000:3000"
+    entrypoint: ["entrypoint.sh"]
+    command: ["rails", "server", "-b", "0.0.0.0"]
+    depends_on:
+      - db
+      - redis
+      - elasticsearch
+      - sidekiq
+    volumes:
+      - .:/app
+
+volumes:
+  db_data:
+  redis_data:
+  es_data:
