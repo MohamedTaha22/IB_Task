@@ -1,0 +1,7 @@
+update_chat_count_job:
+  cron: "*/30 * * * *"
+  class: "UpdateChatCountWorker"
+
+update_message_count_job:
+  cron: "*/30 * * * *"
+  class: "UpdateMessageCountWorker"
