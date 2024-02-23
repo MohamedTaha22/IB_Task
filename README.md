@@ -1,24 +1,31 @@
-# README
+# Project Documentation
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+## Ruby Version
+- 3.0.2
 
-Things you may want to cover:
+## Rails Version
+- 7.1.3
 
-* Ruby version
+## Starting Up Using Docker
+To run the project using Docker, execute the following command:
+```bash
+docker-compose up
+```
+This command will start the containers and run the database migrations. You can access the application at http://localhost:3000. For API testing, a Postman collection is provided in `IB_Test.postman_collection.json`.
+## Background Jobs
 
-* System dependencies
+The application includes two background jobs that run every 30 minutes to update chat and message counts:
+- `UpdateMessageCountWorker`
+- `UpdateChatCountWorker`
 
-* Configuration
+And there are jobs for creating and updating the messages and chats
 
-* Database creation
+These jobs are managed and executed using Sidekiq.
 
-* Database initialization
+## Technology Stack
 
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+- **Backend Framework**: Ruby on Rails is used for server-side operations.
+- **Primary Database**: MySQL is employed for structured data storage.
+- **In-Memory Data Store**: Redis is leveraged for rapid data access and caching.
+- **Job Scheduling and Background Processing**: Sidekiq is integrated for efficient task queuing and execution.
+- **Search Engine**: Elasticsearch is incorporated for comprehensive and fast full-text search capabilities.
